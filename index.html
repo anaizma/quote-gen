@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Quote Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 700px; }
+    input, button { font-size: 1rem; padding: .6rem .8rem; }
+    #result { margin-top: 1rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Find a Quote</h1>
+  <form id="form">
+    <input id="search" placeholder="e.g. life, love, success" required />
+    <button type="submit">Get quote</button>
+  </form>
+
+  <div id="result" hidden>
+    <blockquote id="quote" style="font-size:1.1rem; margin:0;"></blockquote>
+    <div id="author" style="margin-top:.5rem; opacity:.7;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const search = document.getElementById('search');
+    const resultBox = document.getElementById('result');
+    const quoteEl = document.getElementById('quote');
+    const authorEl = document.getElementById('author');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const term = encodeURIComponent(search.value.trim());
+      if (!term) return;
+
+      resultBox.hidden = true;
+      quoteEl.textContent = 'Loading...';
+      authorEl.textContent = '';
+      resultBox.hidden = false;
+
+      try {
+        const res = await fetch(`/quote/${term}`);
+        const data = await res.json();
+        if (!data.quote) {
+          quoteEl.textContent = 'No quotes found.';
+          authorEl.textContent = '';
+          return;
+        }
+        quoteEl.textContent = `“${data.quote}”`;
+        authorEl.textContent = data.author ? `— ${data.author}` : '';
+      } catch (err) {
+        quoteEl.textContent = 'Error fetching quote.';
+        authorEl.textContent = '';
+      }
+    });
+  </script>
+</body>
+</html>
